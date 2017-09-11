@@ -65,13 +65,13 @@ python nessus2zabbix.py -ns 192.168.1.230 -nr "my_scan" -ni True -nk ./nessus_ap
                         Overwrites all other cli parameters!<br>
 
 # Zabbix keys
-cis.compliance.failed
-cis.compliance.passed
-cis.compliance.warning
-nessus.policy.name
-nessus.scan.name
-nessus.date.latest.scan
-vulnerability.critical
-vulnerability.high
-vulnerability.low
-vulnerability.medium
+cis.compliance.failed<br>
+cis.compliance.passed<br>
+cis.compliance.warning<br>
+nessus.policy.name<br>
+nessus.scan.name<br>
+nessus.date.latest.scan<br>
+vulnerability.critical<br>
+vulnerability.high<br>
+vulnerability.low<br>
+vulnerability.medium<br>
