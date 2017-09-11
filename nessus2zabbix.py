@@ -1,7 +1,5 @@
-
-#This takes as input a .nessus scan file or a scan name with Nessus API location and key with either vulnerability or compliance info (or both)
-#and passes it to zabbix.
-
+#This takes as input a .nessus scan file or a scan name with Nessus API location and key 
+#with either vulnerability or compliance info (or both) and passes it to zabbix.
 #autor: @Ar0xA / ar0xa@tldr.nu
 
 from bs4 import BeautifulSoup
