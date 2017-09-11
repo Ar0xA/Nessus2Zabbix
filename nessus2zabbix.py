@@ -1,19 +1,6 @@
 
-#This takes as input a .nessus scan file with either vulnerability or compliance info (or both)
+#This takes as input a .nessus scan file or a scan name with Nessus API location and key with either vulnerability or compliance info (or both)
 #and passes it to zabbix.
-#
-#Zabbix keys:
-#
-#cis.compliance.failed
-#cis.compliance.passed
-#cis.compliance.warning
-#nessus.policy.name
-#nessus.scan.name
-#nessus.date.latest.scan
-#vulnerability.critical
-#vulnerability.high
-#vulnerability.low
-#vulnerability.medium
 
 #autor: @Ar0xA / ar0xa@tldr.nu
 
@@ -84,7 +71,7 @@ def parse_vuln_results(hosts):
         #lets iterate through the reportItem, here the compliance items will be
         reportItems = host.findAll('reportitem')
         for rItem in reportItems:
-            #ok, so we need to find  all report items that do NOT include <compliance>true</compliance>
+            #We need to find  all report items that do NOT include <compliance>true</compliance>
             try:
                 vuln_item = rItem.find('compliance')
                 risk_factor = rItem.find('risk_factor')
@@ -111,13 +98,13 @@ def parse_vuln_results(hosts):
     else:
         return []
 
-#here we parse results from the nessus file, we extract the compliance results and return that in an array
+#Here we parse results from the nessus file, we extract the compliance results and return that in an array
 #in the format [ ['hostname', int(passed), int(warning), int(failed)], [etc.] ]
 def parse_comp_results(hosts):
     print "Checking for compliance results..."
     tmp_res=[]
     is_data = False
-    # lets go through each host
+    # Lets go through each host
     for host in hosts:
         failed = 0
         passed = 0
@@ -126,7 +113,7 @@ def parse_comp_results(hosts):
         #lets iterate through the reportItem, here the compliance items will be
         reportItems = host.findAll('reportitem')
         for rItem in reportItems:
-            #ok lets find all compliance result items, and ONLY compliance items
+            #Lets find all compliance result items, and ONLY compliance items
             try:
                 compliance_item = rItem.find('cm:compliance-result')
                 if (compliance_item != None) and(compliance_item.get_text() == 'PASSED'):
@@ -269,12 +256,12 @@ def main():
     if args.config:
         args = replace_args(args)
 
-    #ok, if not
+    #if not
     if (not args.input) and (not args.nessusscanname):
         print('Need input file or Nessus scan to export. Specify one in the configuation file,  with -i (file) or -rn (reportname)\n See -h for more info')
         sys.exit(1)
 
-    #ok so we assume we have to download a report
+    #ok so we have to download a report
     if args.nessusscanname:
         print "Parsing scan results from Nessus API"
         keys=None
@@ -300,7 +287,7 @@ def main():
         if args.nessuscapath and not os.path.isdir(args.nessuscapath):
             print('CA path "' + args.nessuscapath + '" not found.')
             sys.exit(1)
-        #ok, lets assume the rest is fine then
+        #Lets assume the rest is fine then
         download_nessus_report(args, keys)
 
     if args.input:
@@ -315,7 +302,6 @@ def main():
         nessus_xml_data = BeautifulSoup(f.read(), 'lxml')
 
     #find metadata we need
-    #todo: if not find items..is this valid nessus file?
     tmp_scanname = nessus_xml_data.report['name']
     if len(tmp_scanname) == 0:
         print 'Didn\'t find report name in file. is this a valid nessus file?'
