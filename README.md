@@ -8,7 +8,8 @@ Can read from local .nessus file (-i ./path/to/file) or talk to the API of the s
 # Example 1: 
 #use config file<br>
 python nessus2zabbix.py -c nessus2zabbix.config<br>
-
+<u>note</u>: using a config file overwrites ALL other cli arguments<br>
+<br>
 # Example 2: 
 #use cli with local nessus file and remote Zabbix server, compliance information only<br>
 python nessus2zabbix.py -i ./my_scan.nessus -t compliance -zs 192.168.1.30<br>
