@@ -1,5 +1,19 @@
-#This takes as input a .nessus scan file or a scan name with Nessus API location and key 
-#with either vulnerability or compliance info (or both) and passes it to zabbix.
+#This takes as input a .nessus scan file with either vulnerability or compliance info (or both)
+#and passes it to zabbix.
+#
+#Zabbix keys:
+#
+#cis.compliance.failed
+#cis.compliance.passed
+#cis.compliance.warning
+#nessus.policy.name
+#nessus.scan.name
+#nessus.date.latest.scan
+#vulnerability.critical
+#vulnerability.high
+#vulnerability.low
+#vulnerability.medium
+
 #autor: @Ar0xA / ar0xa@tldr.nu
 
 from bs4 import BeautifulSoup
@@ -69,7 +83,7 @@ def parse_vuln_results(hosts):
         #lets iterate through the reportItem, here the compliance items will be
         reportItems = host.findAll('reportitem')
         for rItem in reportItems:
-            #We need to find  all report items that do NOT include <compliance>true</compliance>
+            #ok, so we need to find  all report items that do NOT include <compliance>true</compliance>
             try:
                 vuln_item = rItem.find('compliance')
                 risk_factor = rItem.find('risk_factor')
@@ -96,13 +110,13 @@ def parse_vuln_results(hosts):
     else:
         return []
 
-#Here we parse results from the nessus file, we extract the compliance results and return that in an array
+#here we parse results from the nessus file, we extract the compliance results and return that in an array
 #in the format [ ['hostname', int(passed), int(warning), int(failed)], [etc.] ]
 def parse_comp_results(hosts):
     print "Checking for compliance results..."
     tmp_res=[]
     is_data = False
-    # Lets go through each host
+    # lets go through each host
     for host in hosts:
         failed = 0
         passed = 0
@@ -111,7 +125,7 @@ def parse_comp_results(hosts):
         #lets iterate through the reportItem, here the compliance items will be
         reportItems = host.findAll('reportitem')
         for rItem in reportItems:
-            #Lets find all compliance result items, and ONLY compliance items
+            #ok lets find all compliance result items, and ONLY compliance items
             try:
                 compliance_item = rItem.find('cm:compliance-result')
                 if (compliance_item != None) and(compliance_item.get_text() == 'PASSED'):
@@ -228,17 +242,17 @@ def replace_args(args):
             Config.read(args.config)
             args.input = Config.get("General","Input")
             args.type = Config.get("General","Type")
-            args.fake = bool(Config.get("General","Fake"))
+            args.fake = Config.getboolean("General","Fake")
             args.zabbixserver = Config.get("Zabbix","ZabbixServer")
-            args.zabbixport = int(Config.get("Zabbix","ZabbixPort"))
+            args.zabbixport = Config.getint("Zabbix","ZabbixPort")
             args.nessusserver = Config.get("Nessus", "NessusServer")
-            args.nessusport = int(Config.get("Nessus", "NessusPort"))
+            args.nessusport = Config.getint("Nessus", "NessusPort")
             args.nessuscapath = Config.get("Nessus", "NessusCAPath")
             args.nessusscanname = Config.get("Nessus", "NessusScanName")
-            args.nessusinsecure = bool(Config.get("Nessus", "NessusInsecure"))
+            args.nessusinsecure = Config.getboolean("Nessus", "NessusInsecure")
             args.nessuskeyfile = Config.get("Nessus", "NessusKeyFile")
             args.nessustmp = Config.get("Nessus", "NessusTMP")
-            args.nessusdeletetmp = bool(Config.get("Nessus", "NessusDeleteTMP"))
+            args.nessusdeletetmp = Config.getboolean("Nessus", "NessusDeleteTMP")
         except IOError:
                 print('could not read config file "' + args.config + '".')
                 sys.exit(1)
@@ -254,12 +268,12 @@ def main():
     if args.config:
         args = replace_args(args)
 
-    #if not
+    #ok, if not
     if (not args.input) and (not args.nessusscanname):
         print('Need input file or Nessus scan to export. Specify one in the configuation file,  with -i (file) or -rn (reportname)\n See -h for more info')
         sys.exit(1)
 
-    #ok so we have to download a report
+    #ok so we assume we have to download a report
     if args.nessusscanname:
         print "Parsing scan results from Nessus API"
         keys=None
@@ -285,7 +299,7 @@ def main():
         if args.nessuscapath and not os.path.isdir(args.nessuscapath):
             print('CA path "' + args.nessuscapath + '" not found.')
             sys.exit(1)
-        #Lets assume the rest is fine then
+        #ok, lets assume the rest is fine then
         download_nessus_report(args, keys)
 
     if args.input:
@@ -300,6 +314,7 @@ def main():
         nessus_xml_data = BeautifulSoup(f.read(), 'lxml')
 
     #find metadata we need
+    #todo: if not find items..is this valid nessus file?
     tmp_scanname = nessus_xml_data.report['name']
     if len(tmp_scanname) == 0:
         print 'Didn\'t find report name in file. is this a valid nessus file?'
